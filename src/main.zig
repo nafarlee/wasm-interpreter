@@ -17,7 +17,8 @@ pub fn main() !void {
     const allocator = gpa.allocator();
     const file = try std.fs.cwd().openFile("main.wasm", .{});
     defer file.close();
-    const contents = try file.readToEndAlloc(allocator, 2000);
-    defer allocator.free(contents);
-    std.debug.print("{s}", .{std.fmt.fmtSliceHexLower(contents)});
+    const bytes = try file.readToEndAlloc(allocator, 2000);
+    defer allocator.free(bytes);
+    var index: usize = 0;
+    try decode_preamble(bytes, &index);
 }
