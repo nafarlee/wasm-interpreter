@@ -20,7 +20,9 @@ pub fn decode_preamble(bytes: []u8, index: *usize) !void {
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
-    const file = try std.fs.cwd().openFile("main.wasm", .{});
+    const args = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, args);
+    const file = try std.fs.cwd().openFile(args[1], .{});
     defer file.close();
     const bytes = try file.readToEndAlloc(allocator, 2000);
     defer allocator.free(bytes);
