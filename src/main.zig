@@ -1,15 +1,20 @@
 const std = @import("std");
 
+const DecodeError = error{
+    InvalidMagicNumber,
+    UnsupportedVersionNumber,
+};
+
 pub fn decode_preamble(bytes: []u8, index: *usize) !void {
-    const magic = bytes[index.* .. index.* + 4];
-    for (magic) |byte| {
-        std.debug.print("0x{X:0^2} ", .{byte});
+    const magic = [_]u8{ 0x00, 0x61, 0x73, 0x6D };
+    if (!std.mem.eql(u8, &magic, bytes[index.* .. index.* + 4])) {
+        return DecodeError.InvalidMagicNumber;
     }
-    std.debug.print("\n", .{});
-    const version = bytes[index.* + 4 .. index.* + 8];
-    for (version) |byte| {
-        std.debug.print("0x{X:0^2} ", .{byte});
+    const version = [_]u8{ 0x01, 0x00, 0x00, 0x00 };
+    if (!std.mem.eql(u8, &version, bytes[index.* + 4 .. index.* + 8])) {
+        return DecodeError.UnsupportedVersionNumber;
     }
+    index.* += 8;
 }
 
 pub fn main() !void {
