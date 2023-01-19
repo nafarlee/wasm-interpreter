@@ -5,6 +5,22 @@ const DecodeError = error{
     UnsupportedVersionNumber,
 };
 
+const SectionID = enum {
+    custom,
+    type,
+    import,
+    function,
+    table,
+    memory,
+    global,
+    _export,
+    start,
+    element,
+    code,
+    data,
+    data_count,
+};
+
 pub fn decode_preamble(bytes: []u8, index: *usize) !void {
     const magic = [_]u8{ 0x00, 0x61, 0x73, 0x6D };
     if (!std.mem.eql(u8, &magic, bytes[index.* .. index.* + 4])) {
