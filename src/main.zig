@@ -38,9 +38,7 @@ pub fn main() !void {
     const allocator = gpa.allocator();
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
-    const file = try std.fs.cwd().openFile(args[1], .{});
-    defer file.close();
-    const bytes = try file.readToEndAlloc(allocator, 2000);
+    const bytes = try std.fs.cwd().readFileAlloc(allocator, args[1], 2000);
     defer allocator.free(bytes);
     var index: usize = 0;
     try decode_preamble(bytes, &index);
