@@ -11,6 +11,7 @@ const DecodeError = error{
     DuplicateSection,
     UnorderedSections,
     InaccurateSectionSize,
+    MissingTypeSectionSeparator,
 };
 
 const SectionID = enum {
