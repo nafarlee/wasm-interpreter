@@ -44,7 +44,7 @@ pub fn main() !void {
     defer file.close();
     const reader = file.reader();
     try decode_preamble(reader);
-    var highest_section_id = 0;
+    var highest_section_id: u8 = 0;
     while (true) {
         const section_id = try reader.readByte();
         if (section_id != 0 and section_id == highest_section_id) {
