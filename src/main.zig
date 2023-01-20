@@ -21,16 +21,15 @@ const SectionID = enum {
     data_count,
 };
 
-pub fn decode_preamble(bytes: []u8, index: *usize) !void {
+pub fn decode_preamble(reader: anytype) !void {
     const magic = [_]u8{ 0x00, 0x61, 0x73, 0x6D };
-    if (!std.mem.eql(u8, &magic, bytes[index.* .. index.* + 4])) {
+    if (!try reader.isBytes(&magic)) {
         return DecodeError.InvalidMagicNumber;
     }
     const version = [_]u8{ 0x01, 0x00, 0x00, 0x00 };
-    if (!std.mem.eql(u8, &version, bytes[index.* + 4 .. index.* + 8])) {
+    if (!try reader.isBytes(&version)) {
         return DecodeError.UnsupportedVersionNumber;
     }
-    index.* += 8;
 }
 
 pub fn main() !void {
@@ -38,8 +37,8 @@ pub fn main() !void {
     const allocator = gpa.allocator();
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
-    const bytes = try std.fs.cwd().readFileAlloc(allocator, args[1], 2000);
-    defer allocator.free(bytes);
-    var index: usize = 0;
-    try decode_preamble(bytes, &index);
+    const file = try std.fs.cwd().openFile(args[1], .{});
+    defer file.close();
+    const reader = file.reader();
+    try decode_preamble(reader);
 }
