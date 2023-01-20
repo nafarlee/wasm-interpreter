@@ -35,6 +35,11 @@ pub fn decode_preamble(reader: anytype) !void {
     }
 }
 
+pub fn decode_type(reader: anytype) !void {
+    const size = std.leb.readULEB128(u32, reader);
+    std.debug.print("Type section size: {!}\n", .{size});
+}
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
@@ -54,6 +59,7 @@ pub fn main() !void {
             return DecodeError.UnorderedSections;
         }
         switch (section_id) {
+            0x01 => try decode_type(reader),
             else => return DecodeError.UnknownSectionID,
         }
     }
