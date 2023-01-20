@@ -1,5 +1,9 @@
 const std = @import("std");
 
+const Types = enum(u8) {
+    i32 = 0x7F,
+};
+
 const DecodeError = error{
     InvalidMagicNumber,
     UnsupportedVersionNumber,
