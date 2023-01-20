@@ -42,8 +42,32 @@ pub fn decode_preamble(reader: anytype) !void {
 }
 
 pub fn decode_type(reader: anytype) !void {
-    const size = std.leb.readULEB128(u32, reader);
-    std.debug.print("Type section size: {!}\n", .{size});
+    const size = try std.leb.readULEB128(u32, reader);
+    var counting_reader = std.io.countingReader(reader);
+    const buffer = counting_reader.reader();
+    var num_types = try std.leb.readULEB128(u32, buffer);
+    while (num_types > 0) {
+        if (!try buffer.isBytes(&[_]u8{0x60})) return DecodeError.MissingTypeSectionSeparator;
+        var num_inputs = try std.leb.readULEB128(u32, buffer);
+        while (num_inputs > 0) {
+            const t = switch (try buffer.readByte()) {
+                0x7F => Types.i32,
+                else => unreachable,
+            };
+            std.debug.print("input: {any}\n", .{t});
+            num_inputs -= 1;
+        }
+        var num_outputs = try std.leb.readULEB128(u32, buffer);
+        while (num_outputs > 0) {
+            const t = switch (try buffer.readByte()) {
+                else => unreachable,
+            };
+            std.debug.print("output: {any}", .{t});
+            num_outputs -= 1;
+        }
+        num_types -= 1;
+    }
+    if (counting_reader.bytes_read != size) return DecodeError.InaccurateSectionSize;
 }
 
 pub fn main() !void {
