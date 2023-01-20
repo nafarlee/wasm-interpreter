@@ -3,6 +3,9 @@ const std = @import("std");
 const DecodeError = error{
     InvalidMagicNumber,
     UnsupportedVersionNumber,
+    UnknownSectionID,
+    DuplicateSection,
+    UnorderedSections,
 };
 
 const SectionID = enum {
@@ -41,4 +44,17 @@ pub fn main() !void {
     defer file.close();
     const reader = file.reader();
     try decode_preamble(reader);
+    var highest_section_id = 0;
+    while (true) {
+        const section_id = try reader.readByte();
+        if (section_id != 0 and section_id == highest_section_id) {
+            return DecodeError.DuplicateSection;
+        }
+        if (section_id != 0 and section_id < highest_section_id) {
+            return DecodeError.UnorderedSections;
+        }
+        switch (section_id) {
+            else => return DecodeError.UnknownSectionID,
+        }
+    }
 }
